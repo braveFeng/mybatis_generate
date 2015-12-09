@@ -3,10 +3,12 @@ package org.mybatis.plugin;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.mybatis.plugin.model.ColumnInfoDto;
 import org.mybatis.plugin.model.ModelDetailDto;
 
 
@@ -57,14 +59,66 @@ public class DbOperationHelper {
 			 builder.append(getPropertyName(pkResult.getString(1)));
 		 }
 		 detailDto.setPkList(builder.toString());
+		 //获取数据库的所有字段
+		 String metaSql = "select * from " + detailDto.getTableName();
+		 PreparedStatement ps3 = conn.prepareStatement(metaSql);
+		 ResultSet metaDataResult = ps3.executeQuery();
+		 ResultSetMetaData metaData = metaDataResult.getMetaData();
+		 //循环获取的元数据
+		 for(int i = 1; i < metaData.getColumnCount(); i++){
+			 
+		 }
 	 }
-	 /**
-		 * Description:通过字段名获取属性名
-		 * @param: GetAllFriendRequest
-		 * @return ModelDetailDto
+	    /**
+		 * Description:给ColumnInfo对象设置信息
+		 * @param: metaData  表的元数据
 		 * @Author:bravefc
 		 * @Create Date: 2015-11-05
 		 */
+	 public void setColumnInfo(ResultSetMetaData metaData ,int i,Map map) throws Exception{
+		 
+		 ColumnInfoDto info = new ColumnInfoDto();
+		 info.setColumnName(metaData.getColumnName(i));
+		 info.setPropertyName(getPropertyName(info.getColumnName()));
+		 info.setColumnComment((String)map.get(info.getColumnName()));
+		 if(metaData.getColumnType(i) == 2){
+				//System.out.println(tableName + " : " + columnIDto.getColumnName() + " : " + metaData.getScale(i) + " : " + metaData.getPrecision(i));
+				if(metaData.getScale(i) > 0){
+					info.setSqlType(6);
+					info.setJavaType(getJavaTypeBySqlType(6));
+				}else if(metaData.getPrecision(i) > 10){
+					info.setSqlType(-5);
+					info.setJavaType(getJavaTypeBySqlType( -5));
+				}else{
+					info.setSqlType(4);
+					info.setJavaType(getJavaTypeBySqlType(4));
+				}
+			}else{
+				info.setSqlType(metaData.getColumnType(i));
+				info.setJavaType(getJavaTypeBySqlType( metaData.getColumnType(i)));
+			}
+
+	 }
+	 /**
+	 * Description:通过sqltype来获取javatype
+	 * @param: GetAllFriendRequest
+	 * @return ModelDetailDto
+	 * @Author:bravefc
+	 * @Create Date: 2015-11-05
+	 */
+	 public String getJavaTypeBySqlType(int type){
+		 
+		 
+		return null;
+		 
+	 }
+	 /**
+	 * Description:通过字段名获取属性名
+	 * @param: GetAllFriendRequest
+	 * @return ModelDetailDto
+	 * @Author:bravefc
+	 * @Create Date: 2015-11-05
+	 */
 	 public String getPropertyName(String columnName){
 		 
 		 StringBuilder builder = new StringBuilder();
