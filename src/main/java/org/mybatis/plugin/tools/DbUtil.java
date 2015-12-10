@@ -16,7 +16,7 @@ public class DbUtil {
 
 	private static Connection conn = null;
 	//打开连接
-	private static Connection openConnection() throws SQLException, ClassNotFoundException, IOException {
+	public static Connection openConnection() throws SQLException, ClassNotFoundException, IOException {
 		
 		if (null == conn || conn.isClosed()) {
 			
