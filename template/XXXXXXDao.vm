@@ -1,0 +1,84 @@
+
+
+#set($basePackageList = ["java.util.List"])
+#set( $source = $gdaoToolsUtil.getJavaImportPart($customSourceList, null, $basePackageList))
+#if($source != "")
+$!{source}
+#end
+
+/**
+ * $!{detailInfoDto.className}DAO接口
+ *
+ * @author admin
+ */
+public interface $!{detailInfoDto.className}Mapper{
+
+	//------------------请在此添加自定义方法（开始）------------------
+#set( $source = $gdaoToolsUtil.getListDataByIndex($customSourceList, 1))
+#if($source != "")
+$!{source}
+#end
+	//------------------请在此添加自定义方法（结束）------------------
+
+    /**
+	 * Description:根据主键id来获取对象$!{detailInfoDto.className}Model
+     * @author admin
+     *
+     * @param id
+     * @return 对象$!{detailInfoDto.className}
+	 * @Create Date: 2014-9-10
+	 */
+    public $!{detailInfoDto.className}Model getObjectById(Integer id);
+
+    /**
+	 * Description:根据Model来获取对象$!{detailInfoDto.className}Model
+     * @author admin
+     *
+     * @param 对象$!{detailInfoDto.className}
+     * @return 对象$!{detailInfoDto.className}
+	 * @Create Date: 2014-9-10
+	 */
+    public $!{detailInfoDto.className}Model getObjectByModel($!{detailInfoDto.className}Model obj);
+
+    /**
+	 * Description:根据Model来获取对象$!{detailInfoDto.className}Model
+     * @author admin
+     *
+     * @param $!{detailInfoDto.className}Model
+     * @return List<$!{detailInfoDto.className}Model>
+	 * @Create Date: 2014-9-10
+	 */
+    public List<$!{detailInfoDto.className}Model> getListByModel($!{detailInfoDto.className}Model obj);
+    
+	/**
+	 * Description:新增对象$!{detailInfoDto.className}Model
+     * @author admin
+     *
+     * @param $!{detailInfoDto.className}Model
+     * @return Integer
+	 * @Create Date: 2014-9-10
+	 */
+    public int insertModel($!{detailInfoDto.className}Model obj);
+    
+	/**
+	 * Description:根据ID更新对象$!{detailInfoDto.className}Model
+	 *        只更新不为空的字段
+     * @author admin
+     *
+	 * @param $!{detailInfoDto.className}Model
+	 * @return 返回更新的记录条数
+	 * @Create Date: 2014-9-10
+	 */
+	public int updateModelById($!{detailInfoDto.className}Model obj);
+    
+	/**
+	 * Description:删除对象
+     * @author admin
+     *
+	 * @param id
+	 * @return 返回删除的记录条数
+	 * @Create Date: 2014-9-10
+	 */
+	public int deleteById(Integer id);
+    
+}

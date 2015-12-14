@@ -6,16 +6,86 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.mybatis.plugin.config.GeneratorConfig;
 import org.mybatis.plugin.model.ColumnInfoDto;
 import org.mybatis.plugin.model.ModelDetailDto;
+import org.mybatis.plugin.tools.CommonUtil;
+import org.mybatis.plugin.tools.DbUtil;
 import org.mybatis.plugin.type.JavaTypeResolver;
 
 
 public class DbOperationHelper {
 
+	//配置文件
+	private GeneratorConfig config;
+	//属性配置文件
+	private Properties configProperties;
+	//数据库连接
+	private Connection conn;
 	
+	public DbOperationHelper(GeneratorConfig config) {
+		super();
+		this.config = config;
+	}
+
+	/**
+	 * Description:main方法
+	 * @param: GetAllFriendRequest
+	 * @return ModelDetailDto
+	 * @Author:bravefc
+	 * @Create Date: 2015-11-05
+	 */
+	public void run(){
+		
+		if(this.config == null){
+			throw new NullPointerException("配置文件不能为空"); 
+		}
+		String[] tableArrays = config.getDb_table_arrays();
+		if(ArrayUtils.isNotEmpty(tableArrays)){
+			throw new NullPointerException("数据库表名不能为空"); 
+		}
+		try {
+			conn = DbUtil.openConnection(config.getDbconn());			
+		} catch (Exception e) {
+			throw new NullPointerException(e.getMessage()); 
+		}
+		try {
+			//初始化配置
+			initData();
+			 //循环遍历数据库表
+			for(String table:tableArrays){
+				ModelDetailDto detailDto = getModelDetailByTable(conn, table, config.getDbconn().getDbSchema());
+				//生成java和xml文件
+			}
+		} catch (Exception e) {
+			throw new RuntimeException(e.getMessage()); 
+		}
+	   
+	}
+	/**
+	 * Description:生成java文件和xml配置文件
+	 * @throws Exception 
+	 * @Author:bravefc
+	 * @Create Date: 2015-11-05
+	 */
+	public void generateJavaAndXml() throws Exception{
+		
+		
+	}
+	/**
+	 * Description:初始化配置信息
+	 * @throws Exception 
+	 * @Author:bravefc
+	 * @Create Date: 2015-11-05
+	 */
+	public void initData() throws Exception{
+		
+		configProperties = CommonUtil.getPropertiesByInputStream(getClass().getClassLoader().getResourceAsStream("config.properties"));
+	}
 	/**
 	 * Description:根据表名获取对应的类和字段信息
 	 * @param: GetAllFriendRequest
@@ -34,6 +104,7 @@ public class DbOperationHelper {
 		 ModelDetailDto detail = new ModelDetailDto();
 		 detail.setTableName(tableName);
 		 detail.setDbSchema(dbSchema);
+		 setDetailInfo(conn, detail);
 		return detail;
 	 }
 	 
