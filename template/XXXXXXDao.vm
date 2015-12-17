@@ -1,5 +1,3 @@
-
-
 #set($basePackageList = ["java.util.List"])
 #set( $source = $gdaoToolsUtil.getJavaImportPart($customSourceList, null, $basePackageList))
 #if($source != "")
@@ -14,10 +12,6 @@ $!{source}
 public interface $!{detailInfoDto.className}Mapper{
 
 	//------------------请在此添加自定义方法（开始）------------------
-#set( $source = $gdaoToolsUtil.getListDataByIndex($customSourceList, 1))
-#if($source != "")
-$!{source}
-#end
 	//------------------请在此添加自定义方法（结束）------------------
 
     /**

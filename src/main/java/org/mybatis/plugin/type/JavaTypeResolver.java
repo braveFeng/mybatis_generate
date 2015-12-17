@@ -37,7 +37,7 @@ public class JavaTypeResolver {
 
     protected boolean forceBigDecimals;
 
-    public static Map<Integer, JdbcTypeInformation> typeMap;
+    public  Map<Integer, JdbcTypeInformation> typeMap;
     
     public JavaTypeResolver() {
         properties = new Properties();
@@ -141,9 +141,19 @@ public class JavaTypeResolver {
         this.warnings = warnings;
     }
 
+    
+
+    public Map<Integer, JdbcTypeInformation> getTypeMap() {
+		return typeMap;
+	}
+
+	public void setTypeMap(Map<Integer, JdbcTypeInformation> typeMap) {
+		this.typeMap = typeMap;
+	}
 
 
-    public static class JdbcTypeInformation {
+
+	public static class JdbcTypeInformation {
         private String jdbcTypeName;
 
         private String javaTypeName;

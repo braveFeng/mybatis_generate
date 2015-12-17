@@ -1,5 +1,6 @@
 package org.mybatis.plugin;
 
+import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -7,9 +8,14 @@ import java.sql.ResultSetMetaData;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+import java.util.Map.Entry;
 
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.velocity.Template;
+import org.apache.velocity.VelocityContext;
+import org.apache.velocity.app.VelocityEngine;
 import org.mybatis.plugin.config.GeneratorConfig;
 import org.mybatis.plugin.model.ColumnInfoDto;
 import org.mybatis.plugin.model.ModelDetailDto;
@@ -45,7 +51,7 @@ public class DbOperationHelper {
 			throw new NullPointerException("配置文件不能为空"); 
 		}
 		String[] tableArrays = config.getDb_table_arrays();
-		if(ArrayUtils.isNotEmpty(tableArrays)){
+		if(ArrayUtils.isEmpty(tableArrays)){
 			throw new NullPointerException("数据库表名不能为空"); 
 		}
 		try {
@@ -60,6 +66,8 @@ public class DbOperationHelper {
 			for(String table:tableArrays){
 				ModelDetailDto detailDto = getModelDetailByTable(conn, table, config.getDbconn().getDbSchema());
 				//生成java和xml文件
+				Map<String, Object> paramMap = new HashMap<String, Object>();
+				paramMap.put("detailDto", detailDto);
 			}
 		} catch (Exception e) {
 			throw new RuntimeException(e.getMessage()); 
@@ -72,9 +80,38 @@ public class DbOperationHelper {
 	 * @Author:bravefc
 	 * @Create Date: 2015-11-05
 	 */
-	public void generateJavaAndXml() throws Exception{
+	public void generateJavaAndXml(Map<String, Object> map) throws Exception{
+		
+		//生成接口的源文件
+		String mapperInterfaceSource = generateInterfaceSource(map);
+	}
+	//生成source文件
+	public String generateInterfaceSource(Map<String, Object> map) throws Exception{
+		
+		//读取模板配置信息 mapper interface
+		String mapper_interface_template_file = configProperties.getProperty("DAO_INTERFACE_TEMPLATE_FILE");
+		
+		return generateSource(mapper_interface_template_file,map);
 		
 		
+	}
+	//生成source
+	public String generateSource(String templateFile,Map<String, Object> paramMap) throws Exception{
+		
+		VelocityContext context = new VelocityContext();	
+		Set<Entry<String, Object>> entrySet = paramMap.entrySet();
+		for(Entry<String, Object> entry:entrySet){
+			context.put(entry.getKey(), entry.getValue());
+		}	
+		StringWriter sw = new StringWriter();
+
+		VelocityEngine engine = getVelocityEngine();
+
+		Template template = engine.getTemplate(templateFile, "UTF-8");
+
+		template.merge(context, sw);
+		
+		return sw.toString();
 	}
 	/**
 	 * Description:初始化配置信息
@@ -158,7 +195,8 @@ public class DbOperationHelper {
 		 //通过元数据获取jdbc和java的数据类型
 		 int jdbcType = JavaTypeResolver.calculateJavaType(metaData, i);
 		 info.setSqlType(jdbcType);
-		 info.setJavaType(JavaTypeResolver.typeMap.get(jdbcType).toString());
+		 JavaTypeResolver resolver = new JavaTypeResolver();
+		 info.setJavaType(resolver.getTypeMap().get(jdbcType).toString());
          detailDto.getColumnList().add(info);
 	 }
 	 
@@ -175,7 +213,7 @@ public class DbOperationHelper {
 		 columnName = columnName.toLowerCase();
 		 String [] array = columnName.split(",");
 		 builder.append(array[0]);
-		 for(int i = 1;i < builder.length(); i++){
+		 for(int i = 1;i < array.length; i++){
 			 if(StringUtils.isBlank(array[i])){
 				 continue;
 			 }
@@ -183,5 +221,24 @@ public class DbOperationHelper {
 		 }
 		 return builder.toString();
 	 }
-	 
+		private static VelocityEngine getVelocityEngine() throws Exception {
+			Properties properties = new Properties();
+			// 可选值："class"--从classpath中读取，"file"--从文件系统中读取
+			properties.setProperty("resource.loader", "file");
+			// 如果从文件系统中读取模板，那么属性值为org.apache.velocity.runtime.resource.loader.FileResourceLoader
+			properties
+					.setProperty("jar.resource.loader.class",
+							"org.apache.velocity.runtime.resource.loader.FileResourceLoader");
+			// properties.setProperty("jar.resource.loader.path", "jar:file:/" +
+			// DAOTool.getLibFilePath() + ToolsConst.SEPARATOR +
+			// ToolsConst.DAOTOOLS_JAR_NAME);
+			properties.setProperty(VelocityEngine.RUNTIME_LOG_LOGSYSTEM_CLASS,
+					"org.apache.velocity.runtime.log.NullLogSystem");
+
+			VelocityEngine engine = new VelocityEngine();
+
+			engine.init(properties);
+			return engine;
+
+		}
 }
