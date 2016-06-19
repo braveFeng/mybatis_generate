@@ -12,7 +12,7 @@
 			<111111>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.62</version>
+			<version>4.82</version>
 		</dependency>
 		<dependency>
 			<groupId>mysql</groupId>
